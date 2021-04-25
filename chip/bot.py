@@ -5,8 +5,12 @@ import pathlib
 from base64 import b64decode
 from os import path
 
+from .sql import Guild
+
 import aiosqlite
+import discord
 from discord.ext import commands
+from tabulate import tabulate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)  # For verbose output, set INFO to DEBUG, or set it to WARNING for just warnings.
@@ -44,6 +48,7 @@ class ChipBot(commands.Bot):
             default_prefix = commands.when_mentioned_or(*self.config["prefix"]["set"])
         else:
             default_prefix = self.config["prefix"]["set"]
+        logger.debug("Set default prefix to: " + str(default_prefix))
 
         async def _fetch_prefix(bot, message):
             if not message.guild:
@@ -53,3 +58,29 @@ class ChipBot(commands.Bot):
                 _resolved_prefix = b64decode(str(_prefix)).decode()
             if bot.config["prefix"]["mention"]:
                 return commands.when_mentioned_or(_resolved_prefix)
+
+        super().__init__(
+            _fetch_prefix,
+            description="Chip - A multi-purpose, open-source, easy to use and powerful moderation bot.",
+            case_insensitive=True,
+            owner_ids=self.config["owners"] or None,
+            strip_after_prefix=True,
+            activity=discord.Activity(
+                name=f"gears turn...",
+                type=discord.ActivityType.watching
+            ),
+            status=discord.Status.dnd,
+            max_messages=self.config["control"]["max_messages"],
+            intents=discord.Intents.all(),
+            allowed_mentions=discord.AllowedMentions(**self.config["allowed_mentions"])
+        )
+        logger.debug("ChipBot initialised.")
+        self.event(self.on_ready)  # This is basically the @bot.event decor, just called internally.
+
+    async def on_ready(self):
+        table = tabulate(
+            [self.user.name, len(self.guilds), len(self.get_all_channels()), len(self.users)],
+            ["Bot Name",     "Guilds",         "Channels",                   "Loaded Users"],
+            tablefmt="pretty"
+        )
+        print(table)

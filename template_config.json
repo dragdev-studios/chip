@@ -20,5 +20,6 @@
     "roles": true,
     "users": true,
     "replied_user": true
-  }
+  },
+  "owners": []
 }
