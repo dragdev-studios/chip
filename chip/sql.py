@@ -8,6 +8,7 @@ class DBModel:
     """
     ABC To allow for unified use of database models.
     """
+
     _state: Connection
     __rows__: list
     _data: dict
@@ -21,10 +22,7 @@ class DBModel:
         :param name: Optional[str] - The name of the table. Defaults to cls.__class__.__name__."""
         if not rows:
             rows = cls.__rows__
-        query = "CREATE TABLE IF NOT EXISTS {} ({});".format(
-            name or cls.__class__.__name__.lower(),
-            ",\n".join(rows)
-        )
+        query = "CREATE TABLE IF NOT EXISTS {} ({});".format(name or cls.__class__.__name__.lower(), ",\n".join(rows))
         # The IF NOT EXISTS in there means this function can be called numerous times.
         await connection.execute(query)
         await connection.commit()
@@ -116,12 +114,13 @@ class Guild(DBModel):
     """
     A database model representing a guild.
     """
+
     __rows__ = [
         "id INTEGER PRIMARY KEY NOT NULL UNIQUE",
         "prefix TEXT NULLABLE DEFAULT NULL",
         "mod_log INTEGER UNIQUE",
         "mod_role INTEGER UNIQUE",
-        "case_id INTEGER"
+        "case_id INTEGER",
     ]
 
     def __init__(self, data: dict, *, state):
@@ -129,20 +128,13 @@ class Guild(DBModel):
         self._data = data
 
     @classmethod
-    async def create(
-            cls,
-            state: Connection,
-            **kwargs
-    ):
+    async def create(cls, state: Connection, **kwargs):
         query = """
         INSERT INTO guilds VALUES (?, ?, ?, ?, ?);
         """
         await state.execute(query, *kwargs.values())
         await state.commit()
-        return cls(
-            kwargs,
-            state=state
-        )
+        return cls(kwargs, state=state)
 
     @classmethod
     async def get(cls, state, key, **other_comps):
@@ -152,17 +144,14 @@ class Guild(DBModel):
         if other_comps:
             where = " AND ".join(f"{column}={value}" for column, value in other_comps.items())
         else:
-            where = "id="+key
+            where = "id=" + key
         query = query.format(where)
         data = {}
         async with state.execute(query) as cursor:
             row = await cursor.fetchone()
             for key in row.keys():
                 data[key] = row[key]
-        return cls(
-            data,
-            state=state
-        )
+        return cls(data, state=state)
 
     async def edit(self, keys: List[str], values):
         if not hasattr(self, "id"):
@@ -176,7 +165,7 @@ class Guild(DBModel):
         for n, key in enumerate(keys):
             _set.append(f"{key}={values[n]}")
         query = query.format(", ")
-        await self.state.execute(query, (self.id, ))
+        await self.state.execute(query, (self.id,))
         await self.state.commit()
 
     async def delete(self) -> None:
@@ -187,7 +176,7 @@ class Guild(DBModel):
             DELETE FROM guilds
             WHERE id=?
             """,
-            (self.id, )
+            (self.id,),
         )
         await self.state.commit()
         return

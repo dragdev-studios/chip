@@ -80,24 +80,25 @@ def main():
     if conditional(required("Would you like to add extra (beta and development) bot tokens? [Y/N] ")):
         real["tokens"]["beta"] = input("Please insert a beta bot token [ ]: ") or None
         real["tokens"]["development"] = input("Please insert a development bot token [ ]: ") or None
-    real["control"]["max_messages"] = interactive_attempt_map("How large should the bot's max message cache be? [1000] ",
-                                                              int, is_required=False, default=1000)
+    real["control"]["max_messages"] = interactive_attempt_map(
+        "How large should the bot's max message cache be? [1000] ", int, is_required=False, default=1000
+    )
     if conditional("Would you like to (at least temporarily) limit how many servers ChipBot can join? [Y/N] "):
         real["control"]["max_guilds"] = interactive_attempt_map(
-            "How many servers can ChipBot join? [30] ",
-            int,
-            is_required=False,
-            default=30
+            "How many servers can ChipBot join? [30] ", int, is_required=False, default=30
         )
 
-    real["sql"] = input("Please input a file path where the sqlite database should be located [./main.db]: "
-                        ) or "./main.db"
+    real["sql"] = (
+        input("Please input a file path where the sqlite database should be located [./main.db]: ") or "./main.db"
+    )
     for key, default in real["allowed_mentions"].items():
         real["allowed_mentions"][key] = conditional(
             input(f"Should the bot be allowed to mention {key}? [Y/N] (default: {default}) ") or str(default)
         )
 
-    real["owners"] = input("Please enter a list of owner user IDs (or hit enter for discord native bot ownership): ") or []
+    real["owners"] = (
+        input("Please enter a list of owner user IDs (or hit enter for discord native bot ownership): ") or []
+    )
     os.system("cls" if os.name == "nt" else "clear")
     print("Saving...")
     with open("./config.json", "w+") as config:

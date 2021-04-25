@@ -14,8 +14,8 @@ from tabulate import tabulate
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)  # For verbose output, set INFO to DEBUG, or set it to WARNING for just warnings.
-handler = logging.FileHandler(filename='chip.log', encoding='utf-8', mode='a')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+handler = logging.FileHandler(filename="chip.log", encoding="utf-8", mode="a")
+handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 logger.addHandler(handler)
 
 
@@ -23,6 +23,7 @@ class ChipBot(commands.Bot):
     """
     Chip's custom subclass of commands.Bot with a few extra useful features.
     """
+
     def __init__(self):
         logger.debug("Began initialising ChipBot.")
         if not path.exists("./config.json"):
@@ -65,14 +66,11 @@ class ChipBot(commands.Bot):
             case_insensitive=True,
             owner_ids=self.config["owners"] or None,
             strip_after_prefix=True,
-            activity=discord.Activity(
-                name=f"gears turn...",
-                type=discord.ActivityType.watching
-            ),
+            activity=discord.Activity(name=f"gears turn...", type=discord.ActivityType.watching),
             status=discord.Status.dnd,
             max_messages=self.config["control"]["max_messages"],
             intents=discord.Intents.all(),
-            allowed_mentions=discord.AllowedMentions(**self.config["allowed_mentions"])
+            allowed_mentions=discord.AllowedMentions(**self.config["allowed_mentions"]),
         )
         logger.debug("ChipBot initialised.")
         self.event(self.on_ready)  # This is basically the @bot.event decor, just called internally.
@@ -80,7 +78,7 @@ class ChipBot(commands.Bot):
     async def on_ready(self):
         table = tabulate(
             [self.user.name, len(self.guilds), len(self.get_all_channels()), len(self.users)],
-            ["Bot Name",     "Guilds",         "Channels",                   "Loaded Users"],
-            tablefmt="pretty"
+            ["Bot Name", "Guilds", "Channels", "Loaded Users"],
+            tablefmt="pretty",
         )
         print(table)

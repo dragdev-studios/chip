@@ -8,6 +8,7 @@ args = parser.parse_args()
 
 if args.setup:
     from cli.setup import main
+
     try:
         main()
     except PermissionError:
