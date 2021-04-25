@@ -271,3 +271,4 @@ chip.log
 config.json
 *.pyc
 *.pyi
+*.db
