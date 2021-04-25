@@ -2,8 +2,10 @@ import json
 import logging
 import sys
 import pathlib
-from base64 import b64decode
+import traceback
 from os import path
+
+from .sql import Guild
 
 import aiosqlite
 import discord
@@ -22,10 +24,12 @@ def get_prefix_getter(default_prefix):
         if not message.guild:
             return default_prefix
         async with bot.db.execute("SELECT prefix FROM guilds WHERE id=?", (message.guild.id,)) as cursor:
-            _prefix = await cursor.fetchone()
-            _resolved_prefix = b64decode(str(_prefix)).decode()
+            _prefix = await cursor.fetchone() or "//"
+            logger.debug("Got prefix '{}' for guild '{}'.".format(_prefix, message.guild.id))
+            _resolved_prefix = _prefix
         if bot.config["prefix"]["mention"]:
             return commands.when_mentioned_or(_resolved_prefix)
+        return _resolved_prefix
     return _fetch_prefix
 
 
@@ -42,7 +46,9 @@ class ChipBot(commands.Bot):
 
         with open("./config.json") as config_raw:
             self.config = json.load(config_raw)
-            logger.debug(f"Loaded configuration: {self.config}")
+            safe_config = self.config.copy()
+            safe_config["tokens"] = "[expunged]"
+            logger.debug(f"Loaded configuration: {safe_config}")
 
         if self.config["prefix"]["mention"]:
             default_prefix = commands.when_mentioned_or(*self.config["prefix"]["set"])
@@ -72,8 +78,19 @@ class ChipBot(commands.Bot):
         _path = pathlib.Path(self.config["sql"])
         logger.debug("Resolved path - " + str(_path))
         self.db = self.loop.run_until_complete(aiosqlite.connect(str(_path)))
+        self.loop.run_until_complete(Guild.create_table(self.db, name="guilds"))
         logger.debug("Connected to database.")
 
+        cogs = [
+            "jishaku",  # debugging
+            "chip.cogs.meta",  # meta cog
+        ]
+        for extension in cogs:
+            try:
+                self.load_extension(extension)
+                logger.debug(f"Loaded extension {extension}.")
+            except Exception as e:
+                logger.warning(f"Failed to load extension {extension}.", exc_info=e)
         logger.debug("ChipBot initialised.")
         self.event(self.on_ready)  # This is basically the @bot.event decor, just called internally.
 
@@ -91,3 +108,12 @@ class ChipBot(commands.Bot):
             tablefmt="pretty",
         )
         print(table)
+
+    async def on_error(self, event_method, *args, **kwargs):
+        print('Ignoring exception in {}'.format(event_method), file=sys.stderr)
+        traceback.print_exc()
+        logger.error(
+            "Ignoring exception in {}.".format(event_method),
+            *args,
+            **kwargs
+        )
