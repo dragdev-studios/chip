@@ -91,7 +91,7 @@ def main():
         )
 
     real["sql"] = input("Please input a file path where the sqlite database should be located [./main.db]: ") or "./main.db"
-    for key, default in real["allowed_mentions"].keys():
+    for key, default in real["allowed_mentions"].values():
         real["allowed_mentions"][key] = conditional(
             input(f"Should hte bot be allowed to mention {key}? [Y/N] (default: {default}) ") or str(default)
         )
