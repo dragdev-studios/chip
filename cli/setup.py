@@ -94,7 +94,7 @@ def main():
                         ) or "./main.db"
     for key, default in real["allowed_mentions"].items():
         real["allowed_mentions"][key] = conditional(
-            input(f"Should hte bot be allowed to mention {key}? [Y/N] (default: {default}) ") or str(default)
+            input(f"Should the bot be allowed to mention {key}? [Y/N] (default: {default}) ") or str(default)
         )
 
     real["owners"] = input("Please enter a list of owner user IDs (or hit enter for discord native bot ownership): ") or []
