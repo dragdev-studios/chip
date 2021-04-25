@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import traceback
 
@@ -23,6 +24,8 @@ class Owner(commands.Cog):
         """Reloads all the provided extensions.
 
         *cogs: A space-delimited list of cogs to reload. Pass only "auto" or "~" ro reload all loaded cogs."""
+        cogs = cogs or "~"
+
         def format_message(r):
             m = ""
             for c in r:
@@ -32,8 +35,8 @@ class Owner(commands.Cog):
                     m += f"\N{white heavy check mark} `{c}`\n"
             return m
 
-        if len(cogs) == 1:
-            if cogs in ["auto", "~"]:
+        if isinstance(cogs, str) or len(cogs) == 1:
+            if cogs[0] in ["all", "auto", "~"]:
                 status = []
                 logger.debug(f"Reloading all cogs at the request of {ctx.author}...")
                 for ext in self.bot.extensions:
@@ -70,6 +73,16 @@ class Owner(commands.Cog):
                 else:
                     status.append(ext)
             return await ctx.send(format_message(status))
+
+    @commands.command(name="shutdown", aliases=['logout'])
+    async def die(self, ctx: commands.Context, *, delay: float = 0.0):
+        """Just closes the bot and logs it out. Optional delay included!"""
+        logger.info(f"Told to close in {delay} seconds by {ctx.author}.")
+        if delay:
+            if delay >= 10.0:
+                await ctx.trigger_typing()
+            await asyncio.sleep(delay)
+        await self.bot.close()
 
 
 def setup(bot):

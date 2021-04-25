@@ -24,6 +24,7 @@
   "owners": [],
   "extensions": [
     "jishaku",
-    "chip.cogs.meta"
+    "chip.cogs.meta",
+    "chip.cogs.owner"
   ]
 }

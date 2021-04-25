@@ -55,7 +55,7 @@ class Meta(commands.Cog):
     async def credits(self, ctx: commands.Context):
         """Displays loads of metadata about the bot."""
         msg = await ctx.send("Loading...")
-        head = await self.run_async(partial(run_shell, ["git", "rev-parse", "HEAD", "--short"], shell=True))
+        # head = await self.run_async(partial(run_shell, ["git", "rev-parse", "HEAD", "--short"], shell=True))
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.github.com/repos/dragdev-studios/chip/tags") as response:
                 data = await response.json()
