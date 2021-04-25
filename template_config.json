@@ -21,5 +21,9 @@
     "users": true,
     "replied_user": true
   },
-  "owners": []
+  "owners": [],
+  "extensions": [
+    "jishaku",
+    "chip.cogs.meta"
+  ]
 }

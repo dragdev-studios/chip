@@ -39,7 +39,8 @@ class ChipBot(commands.Bot):
     """
 
     def __init__(self):
-        logger.debug("Began initialising ChipBot.")
+        self.__version__ = "0.1.0a"
+        logger.debug(f"Began initialising ChipBot v{self.__version__}.")
         if not path.exists("./config.json"):
             print("There is no configuration file. Please run `python3 main.py --setup`.")
             sys.exit(4)
@@ -81,10 +82,11 @@ class ChipBot(commands.Bot):
         self.loop.run_until_complete(Guild.create_table(self.db, name="guilds"))
         logger.debug("Connected to database.")
 
-        cogs = [
-            "jishaku",  # debugging
-            "chip.cogs.meta",  # meta cog
-        ]
+        # cogs = [
+        #     "jishaku",  # debugging
+        #     "chip.cogs.meta",  # meta cog
+        # ]
+        cogs = self.config["extensions"]
         for extension in cogs:
             try:
                 self.load_extension(extension)
